@@ -32,9 +32,9 @@ grouped = df.groupby('arrival_city').size().reset_index(name='train_count')
 # Зміщення індексу, щоб починати з 1 замість 0
 grouped.index += 1
 
-# Виведення результатів без стовпців 'train_number' та 'arrival_city' у першій таблиці
+# Виведення результатів
 print("Розклад поїздів:")
-print(df[['route', 'arrival', 'departure']])  # Тут ми не включаємо 'train_number' і 'arrival_city'
+print(df[['route', 'arrival', 'departure']])
 
 print("\nКількість поїздів для кожного міста прибуття:")
 print(grouped)
