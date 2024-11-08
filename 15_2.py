@@ -5,15 +5,16 @@ import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 plt.rcParams['figure.figsize'] = (15, 5)
 
+# Налаштування відображення всіх колонок і рядків в pandas та розширення виводу таблиці
+pd.set_option('display.max_columns', None)  # Відображення всіх колонок
+pd.set_option('display.max_rows', None)  # Відображення всіх рядків (опціонально)
+pd.set_option('display.expand_frame_repr', False)  # Відображення всіх колонок в одному блоці
+
 # Завантаження даних з правильним кодуванням і розпізнаванням дат
 data = pd.read_csv('data2009.csv', encoding='latin1', parse_dates=['Date'], dayfirst=True)
 
 # Видалення порожніх стовпців, включаючи 'Unnamed: 1'
 data = data.drop(columns=['Unnamed: 1'], errors='ignore')
-
-# Виведення перших п'яти рядків після видалення порожніх стовпців з початковим індексом з 1
-print("Перші п'ять рядків даних після завантаження:")
-print(data.head(5).reset_index(drop=True).rename(index=lambda x: x + 1))
 
 # Додавання стовпця 'Month'
 data['Month'] = data['Date'].dt.month
@@ -21,11 +22,25 @@ data['Month'] = data['Date'].dt.month
 # Сумування даних з усіх колонок, що представляють кількість велосипедистів
 data['Total_Count'] = data[['Berri1', 'Maisonneuve_1', 'Maisonneuve_2', 'Brebeuf']].sum(axis=1)
 
-# Виведення перших п'яти рядків після додавання Total_Count з рахунком рядків з 1
-print("\nПерші п'ять рядків з доданим стовпцем Total_Count:")
-print(data[['Date', 'Berri1', 'Maisonneuve_1', 'Maisonneuve_2', 'Brebeuf', 'Total_Count']].head(5).reset_index(drop=True).rename(index=lambda x: x + 1))
+# Групування даних за місяцями та підрахунок загальної кількості велосипедистів
+monthly_usage = data.groupby('Month')['Total_Count'].sum()
 
-# Групування даних за місяцями та підрахунок кількості велосипедистів для кожного міста
+# Визначення місяця з найбільшою кількістю велосипедистів
+most_popular_month = monthly_usage.idxmax()
+print(f"Найпопулярніший місяць серед велосипедистів: {most_popular_month}")
+
+# Фільтрація даних для рядків лише з найбільш популярного місяця
+popular_month_data = data[data['Month'] == most_popular_month]
+
+# Виведення рядків даних для найбільш популярного місяця
+print("\nРядки даних для найбільш популярного місяця:")
+print(popular_month_data.reset_index(drop=True).rename(index=lambda x: x + 1))
+
+# Підрахунок загальної суми Total_Count для найбільш популярного місяця
+total_count_sum = popular_month_data['Total_Count'].sum()
+print(f"\nЗагальна сума Total_Count для найбільш популярного місяця: {total_count_sum}")
+
+# Візуалізація даних на лінійному графіку для кожного місяця по містах
 monthly_city_usage = data.groupby('Month')[['Berri1', 'Maisonneuve_1', 'Maisonneuve_2', 'Brebeuf']].sum()
 
 # Створення повного індексу для місяців і додавання відсутніх місяців з нульовими значеннями
@@ -36,7 +51,7 @@ monthly_city_usage = monthly_city_usage.reindex(all_months, fill_value=0)
 month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 monthly_city_usage.index = month_names
 
-# Візуалізація даних на лінійному графіку для кожного міста
+# Візуалізація загальної кількості велосипедистів по місяцях для кожного міста
 monthly_city_usage.plot(kind='line', marker='o', linestyle='-')
 plt.title('Загальна кількість велосипедистів по місяцях для кожного міста')
 plt.xlabel('Місяць')
