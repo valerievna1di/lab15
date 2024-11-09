@@ -25,12 +25,16 @@ data['Total_Count'] = data[['Berri1', 'Maisonneuve_1', 'Maisonneuve_2', 'Brebeuf
 # Групування даних за місяцями та підрахунок загальної кількості велосипедистів
 monthly_usage = data.groupby('Month')['Total_Count'].sum()
 
+# Маппінг чисел на назви місяців
+month_names = ['січень', 'лютий', 'березень', 'квітень', 'травень', 'червень', 'липень', 'серпень', 'вересень', 'жовтень', 'листопад', 'грудень']
+monthly_usage.index = monthly_usage.index.map(lambda x: month_names[x - 1])
+
 # Визначення місяця з найбільшою кількістю велосипедистів
 most_popular_month = monthly_usage.idxmax()
 print(f"Найпопулярніший місяць серед велосипедистів: {most_popular_month}")
 
 # Фільтрація даних для рядків лише з найбільш популярного місяця
-popular_month_data = data[data['Month'] == most_popular_month]
+popular_month_data = data[data['Month'] == month_names.index(most_popular_month) + 1]
 
 # Виведення рядків даних для найбільш популярного місяця
 print("\nРядки даних для найбільш популярного місяця:")
@@ -47,8 +51,7 @@ monthly_city_usage = data.groupby('Month')[['Berri1', 'Maisonneuve_1', 'Maisonne
 all_months = pd.Index(range(1, 13), name='Month')
 monthly_city_usage = monthly_city_usage.reindex(all_months, fill_value=0)
 
-# Маппінг чисел на назви місяців
-month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+# Встановлення назв місяців як індексу
 monthly_city_usage.index = month_names
 
 # Візуалізація загальної кількості велосипедистів по місяцях для кожного міста
